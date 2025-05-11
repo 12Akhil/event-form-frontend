@@ -8,8 +8,9 @@ const QRScanner = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [userData, setUserData] = useState(null);
   const html5QrCodeRef = useRef(null);
-const apiUrl = import.meta.env.VITE_API_URL;
+ const apiUrl = import.meta.env.VITE_API_URL;
   useEffect(() => {
     return () => {
       if (html5QrCodeRef.current) {
@@ -22,6 +23,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
     setCameraActive(true);
     setError('');
     setScanResult(null);
+    setUserData(null);
 
     try {
       const devices = await Html5Qrcode.getCameras();
@@ -31,12 +33,10 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
         await html5QrCodeRef.current.start(
           cameraId,
-          {
-            fps: 10,
-            qrbox: { width: 250, height: 250 }
-          },
-          async (decodedText) => {
-            await verifyQRCode(decodedText);
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            setScanResult(decodedText);
+            handleCheckIn(decodedText); // Call check-in API
             stopCameraScan();
           },
           (errorMessage) => {
@@ -73,6 +73,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
     setIsLoading(true);
     setError('');
     setScanResult(null);
+    setUserData(null);
     if (cameraActive) await stopCameraScan();
 
     try {
@@ -83,75 +84,57 @@ const apiUrl = import.meta.env.VITE_API_URL;
       const formData = new FormData();
       formData.append('file', file);
 
-      const decodeResponse = await axios.post(
+      const response = await axios.post(
         'https://api.qrserver.com/v1/read-qr-code/',
         formData,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
 
-      const decodedText = decodeResponse.data[0]?.symbol[0]?.data;
+      const decodedText = response.data[0]?.symbol[0]?.data;
       if (!decodedText) throw new Error('No QR code found in image');
 
-      await verifyQRCode(decodedText);
+      setScanResult(decodedText);
+      handleCheckIn(decodedText);
     } catch (err) {
-      console.error('Scan error:', err);
-      setError(err.response?.data?.message || 
-               err.message || 
-               'Failed to verify QR code. Please try again.');
+      console.error('Image scan error:', err);
+      setError(err.message || 'Failed to read QR code from image.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const verifyQRCode = async (qrCodeId) => {
+  const handleCheckIn = async (qrCodeId) => {
     try {
-      const verifyResponse = await axios.post(`${apiUrl}/api/verify-qr`, {
-        qrCodeId: qrCodeId.trim()
-      }, { headers: { 'Content-Type': 'application/json' } });
-
-      if (!verifyResponse.data.success) {
-        throw new Error(verifyResponse.data.message || 'Verification failed');
-      }
-
-      setScanResult(verifyResponse.data.user);
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  const handleCheckIn = async () => {
-    try {
-      if (!scanResult) return;
-      
-      const response = await axios.post(`${apiUrl}/api/check-in`, {
-        qrCodeId: scanResult.qrCode
-      });
-
+      const response = await axios.post(`${apiUrl}/api/check-in`, { qrCodeId });
       if (response.data.success) {
-        setScanResult(prev => ({
-          ...prev,
-          isCheckedIn: true
-        }));
+        setUserData(response.data.user);
+      } else {
+        setError('User not found');
       }
     } catch (err) {
       console.error('Check-in error:', err);
-      setError('Failed to update check-in status');
+      setError('Error checking in. Please try again.');
     }
+  };
+
+  const handleManualCheckIn = async () => {
+    if (!scanResult) return;
+    await handleCheckIn(scanResult);
   };
 
   return (
     <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>QR Code Check-In</h2>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>QR Code Reader</h2>
 
       {/* Live Camera Preview */}
-      <div style={{ 
+      <div style={{
         marginBottom: '20px',
         border: '2px solid #ddd',
         borderRadius: '8px',
         overflow: 'hidden',
         minHeight: '300px',
         display: cameraActive ? 'block' : 'none',
-        backgroundColor: '#f5f5f5'
+        backgroundColor: '#000000FF'
       }}>
         <div id="qr-reader" style={{ width: '100%' }}></div>
       </div>
@@ -195,7 +178,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
       {/* Divider */}
       <div style={{ textAlign: 'center', margin: '20px 0', position: 'relative' }}>
         <hr style={{ borderTop: '1px solid #ddd' }} />
-        <span style={{ 
+        <span style={{
           backgroundColor: '#fff',
           padding: '0 10px',
           position: 'absolute',
@@ -236,7 +219,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
       {/* Error Display */}
       {error && (
-        <div style={{ 
+        <div style={{
           color: '#721c24',
           backgroundColor: '#f8d7da',
           border: '1px solid #f5c6cb',
@@ -249,58 +232,55 @@ const apiUrl = import.meta.env.VITE_API_URL;
         </div>
       )}
 
-      {/* Scan Results */}
+      {/* Scan Result and User Info */}
       {scanResult && (
         <div style={{
-          border: '1px solid #d4edda',
+          border: '1px solid #c3e6cb',
           borderRadius: '8px',
           padding: '20px',
           marginTop: '20px',
-          backgroundColor: '#f8f9fa'
+          backgroundColor: '#d4edda'
         }}>
-          <h3 style={{ 
-            marginTop: 0, 
-            textAlign: 'center',
-            color: '#155724'
-          }}>
-            ✓ User Verified
-          </h3>
-          <div style={{ marginBottom: '15px' }}>
-            <p><strong>Name:</strong> {scanResult.fullName}</p>
-            <p><strong>Email:</strong> {scanResult.email}</p>
-            <p><strong>Phone:</strong> {scanResult.phone}</p>
-          </div>
-          <div style={{ 
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <div>
-              <strong>Status:</strong> 
-              <span style={{ 
-                color: scanResult.isCheckedIn ? '#28a745' : '#dc3545',
-                marginLeft: '5px',
-                fontWeight: 'bold'
-              }}>
-                {scanResult.isCheckedIn ? 'Checked In' : 'Not Checked In'}
-              </span>
-            </div>
-            {!scanResult.isCheckedIn && (
-              <button
-                onClick={handleCheckIn}
-                style={{
-                  padding: '5px 10px',
-                  backgroundColor: '#dc3545',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Check In
-              </button>
-            )}
-          </div>
+          <h4 style={{ textAlign: 'center', color: '#155724' }}>✓ QR Code Scanned</h4>
+          <p style={{ wordWrap: 'break-word', color: '#155724' }}><strong>Content:</strong> {scanResult}</p>
+        </div>
+      )}
+
+      {userData && (
+        <div style={{
+          border: '1px solid #17a2b8',
+          borderRadius: '8px',
+          padding: '20px',
+          marginTop: '20px',
+          backgroundColor: '#000000FF'
+        }}>
+          <h4 style={{ color: '#0c5460' }}>User Details</h4>
+          <p><strong>Name:</strong> {userData.fullName}</p>
+          <p><strong>Email:</strong> {userData.email}</p>
+          <p><strong>Phone:</strong> {userData.phone}</p>
+          <p>
+            <strong>Checked In:</strong>{' '}
+            <span style={{ color: userData.isCheckedIn ? 'green' : 'red', fontWeight: 'bold' }}>
+              {userData.isCheckedIn ? 'Yes' : 'No'}
+            </span>
+          </p>
+
+          {!userData.isCheckedIn && (
+            <button
+              onClick={handleManualCheckIn}
+              style={{
+                marginTop: '10px',
+                padding: '10px 20px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Check In
+            </button>
+          )}
         </div>
       )}
     </div>
