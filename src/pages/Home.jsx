@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom'; 
 
 export default function Home() {
-  const apiUrl = import.meta.env.FRONT_URL;
+  const apiUrl = import.meta.env.VITE_FRONT_URL;
+  console.log(apiUrl);
   const navigate = useNavigate();
   const formUrl = `${apiUrl}/register`;
 
