@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import {HashRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Home from './pages/Home';
 import Admin from './pages/Admin';
@@ -11,7 +11,7 @@ import AdminLogin from './pages/AdminLogin'
 import Scanner from './pages/Scanner'
 function App() {
   return (
-    <>
+   <HashRouter>
       <Navbar />
       <main>
         <Routes>
@@ -25,7 +25,7 @@ function App() {
           <Route path="/admin-login" element={<AdminLogin />} />
         </Routes>
       </main>
-    </>
+    </HashRouter>
   );
 }
 
