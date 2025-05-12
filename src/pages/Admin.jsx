@@ -28,7 +28,7 @@ export default function Admin() {
               <td>{u.fullName}</td>
               <td>{u.email}</td>
               <td>{u.phone}</td>
-              <td>{u.checkedIn ? 'Yes' : 'No'}</td>
+              <td>{u.ischeckedIn ? 'Yes' : 'No'}</td>
             </tr>
           ))}
         </tbody>
