@@ -15,18 +15,18 @@ export default function Navbar() {
   return (
     <nav
       style={{
-        position: "fixed", // Makes navbar stick to top
+        position: "fixed", 
         top: 0,
         left: 0,
-        right: 0, // Full width
+        right: 0, 
         backgroundColor: "#000",
         color: "#fff",
         padding: "1rem",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        zIndex: 1000, // Ensures navbar stays above other content
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)" // Optional: adds subtle shadow
+        zIndex: 1000, 
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)" 
       }}
     >
       <button 

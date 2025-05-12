@@ -36,7 +36,7 @@ const QRScanner = () => {
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText) => {
             setScanResult(decodedText);
-            handleCheckIn(decodedText); // Call check-in API
+            handleCheckIn(decodedText);
             stopCameraScan();
           },
           (errorMessage) => {
@@ -175,7 +175,7 @@ const QRScanner = () => {
         )}
       </div>
 
-      {/* Divider */}
+
       <div style={{ textAlign: 'center', margin: '20px 0', position: 'relative' }}>
         <hr style={{ borderTop: '1px solid #ddd' }} />
         <span style={{
@@ -217,7 +217,7 @@ const QRScanner = () => {
         </button>
       </div>
 
-      {/* Error Display */}
+    
       {error && (
         <div style={{
           color: '#721c24',
@@ -232,7 +232,7 @@ const QRScanner = () => {
         </div>
       )}
 
-      {/* Scan Result and User Info */}
+   
       {scanResult && (
         <div style={{
           border: '1px solid #c3e6cb',

@@ -26,7 +26,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
         throw new Error(data.error || 'Login failed');
       }
 
-      // Redirect to /user page with user info
+    
       navigate('/user', {
         state: { 
             email: formData.email,

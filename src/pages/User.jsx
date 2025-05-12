@@ -12,7 +12,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
     const fetchUserData = async () => {
       try {
         const { email } = location.state || {};
-        console.log("Fetching user with email:", email); // Debug log
+        console.log("Fetching user with email:", email);
         
         if (!email) {
           throw new Error('No email provided in location state');
@@ -27,7 +27,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
           credentials: 'include'
         });
 
-        console.log("Response status:", response.status); // Debug log
+        console.log("Response status:", response.status);
         
         if (!response.ok) {
           const errorData = await response.json();
@@ -35,7 +35,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
         }
 
         const data = await response.json();
-        console.log("Received user data:", data); // Debug log
+        console.log("Received user data:", data); 
         
         if (!data.user) {
           throw new Error('User data not found in response');
