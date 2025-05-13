@@ -9,12 +9,25 @@ export default function RegistrationForm() {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
   const apiUrl = import.meta.env.VITE_API_URL;
+  const mailboxAccessKey = '9ce5612d6f2131bfb38742f2cd3cfc34';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     try {
+     
+      const emailCheckResponse = await fetch(`https://apilayer.net/api/check?access_key=${mailboxAccessKey}&email=${formData.email}`);
+      const emailCheckData = await emailCheckResponse.json();
+
+      if (emailCheckData.free === true) {
+        setError('Only business email addresses are allowed.');
+        return;
+      }
+
+  
       const response = await fetch(`${apiUrl}/api/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -22,18 +35,18 @@ export default function RegistrationForm() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
       }
 
-      navigate('/thank', { 
-        state: { 
+      navigate('/thank', {
+        state: {
           user: data.user,
           qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data.user.qrCode)}`
-        } 
+        }
       });
-      
+
     } catch (err) {
       setError(err.message);
     }
@@ -76,6 +89,7 @@ export default function RegistrationForm() {
           <input
             type="tel"
             name="phone"
+            maxLength="10"
             value={formData.phone}
             onChange={handleChange}
             required
