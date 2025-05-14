@@ -13,6 +13,9 @@ export default function Home() {
   const Scanner = () => {
     navigate('/check-in'); 
   };
+  const audio = () => {
+    navigate("/audio"); 
+  };
 
   return (
     <div style={{ textAlign: 'center', padding: '20px', paddingTop: '80px' }}>
@@ -27,6 +30,25 @@ export default function Home() {
           alt="Registration QR Code"
         />
       </div>
+     &nbsp;&nbsp;
+    <div>
+      <button
+        onClick={audio}  
+        style={{
+          backgroundColor: "#fff",
+          color: "#000",
+          border: "none",
+          padding: "0.5rem 1.5rem",
+          borderRadius: "4px",
+          cursor: "pointer",
+          fontWeight: "bold",
+          fontSize: "1rem"
+        }}
+      >
+       For Audio Login
+      </button> 
+    </div>
+
       <p>Scan this QR code with any smartphone camera to access the registration form</p>
       <button onClick={handleAlreadyRegisteredClick} style={buttonStyle}>
         If already registered, Click here..!

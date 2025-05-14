@@ -7,7 +7,9 @@ export default function Navbar() {
   const handleAdminLogin = () => {
     navigate("/admin-login"); 
   };
-  
+  const audio = () => {
+    navigate("/audio"); 
+  };
   const goHome = () => {
     navigate("/"); 
   };
@@ -44,6 +46,22 @@ export default function Navbar() {
         Event Form
       </button>
       
+       {/* <button
+        onClick={audio}  
+        style={{
+          backgroundColor: "#fff",
+          color: "#000",
+          border: "none",
+          padding: "0.5rem 1.5rem",
+          borderRadius: "4px",
+          cursor: "pointer",
+          fontWeight: "bold",
+          fontSize: "1rem"
+        }}
+      >
+        Audio
+      </button> */}
+
       <button
         onClick={handleAdminLogin}  
         style={{

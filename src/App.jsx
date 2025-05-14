@@ -9,6 +9,7 @@ import Thank from './pages/Thank'
 import UserLogin from './pages/UserLogin'
 import AdminLogin from './pages/AdminLogin'
 import Scanner from './pages/Scanner'
+import Dictaphone from './pages/Dictaphone';
 function App() {
   return (
     <>
@@ -23,6 +24,7 @@ function App() {
           <Route path="/user" element={<User />} />
           <Route path="/user-login" element={<UserLogin />} />
           <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/audio" element={<Dictaphone/>}/>
         </Routes>
       </main>
     </>
