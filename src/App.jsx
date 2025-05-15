@@ -10,6 +10,7 @@ import UserLogin from './pages/UserLogin'
 import AdminLogin from './pages/AdminLogin'
 import Scanner from './pages/Scanner'
 import Dictaphone from './pages/Dictaphone';
+import Language from './pages/Language';
 function App() {
   return (
     <>
@@ -22,6 +23,7 @@ function App() {
           <Route path="/check-in" element={<Scanner />} />
           <Route path="/thank" element={<Thank />} />
           <Route path="/user" element={<User />} />
+          <Route path="/language" element={<Language />} />
           <Route path="/user-login" element={<UserLogin />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/audio" element={<Dictaphone/>}/>

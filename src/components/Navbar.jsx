@@ -7,8 +7,8 @@ export default function Navbar() {
   const handleAdminLogin = () => {
     navigate("/admin-login"); 
   };
-  const audio = () => {
-    navigate("/audio"); 
+  const language = () => {
+    navigate("/language"); 
   };
   const goHome = () => {
     navigate("/"); 
@@ -47,7 +47,7 @@ export default function Navbar() {
       </button>
       
        {/* <button
-        onClick={audio}  
+        onClick={language}  
         style={{
           backgroundColor: "#fff",
           color: "#000",
@@ -59,7 +59,7 @@ export default function Navbar() {
           fontSize: "1rem"
         }}
       >
-        Audio
+        Live Audio
       </button> */}
 
       <button
