@@ -3,12 +3,21 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import { QRCodeSVG } from 'qrcode.react';
 
 const Dictaphone = () => {
-  const { transcript, listening, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
- const apiUrl = import.meta.env.VITE_API_URL;
+  const { 
+    transcript, 
+    listening, 
+    resetTranscript, 
+    browserSupportsSpeechRecognition,
+    isMicrophoneAvailable
+  } = useSpeechRecognition();
+  
+  const apiUrl = import.meta.env.VITE_API_URL;
   const [fullName, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [responseData, setResponseData] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     extractSmartInfo(transcript);
@@ -20,17 +29,28 @@ const Dictaphone = () => {
     }
   }, [fullName, phone]);
 
-//ADDED
-  useEffect(() => {
-  navigator.mediaDevices.getUserMedia({ audio: true })
-    .then(() => {
-      console.log("Microphone permission granted.");
-    })
-    .catch((err) => {
+  const checkMicrophonePermission = async () => {
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      setPermissionDenied(false);
+    } catch (err) {
       console.error("Microphone access denied:", err);
-    });
-}, []);
+      setPermissionDenied(true);
+      setError("Microphone permission was denied. Please allow microphone access.");
+    }
+  };
 
+  const handleStartListening = async () => {
+    resetAll();
+    await checkMicrophonePermission();
+    if (!permissionDenied) {
+      try {
+        await SpeechRecognition.startListening({ continuous: true });
+      } catch (err) {
+        setError("Failed to start speech recognition: " + err.message);
+      }
+    }
+  };
 
   const extractSmartInfo = (text) => {
     const digitsOnly = text.replace(/(\d)\s+(\d)/g, '$1$2');
@@ -73,57 +93,78 @@ const Dictaphone = () => {
     setPhone('');
     setResponseData(null);
     setSubmitted(false);
+    setError(null);
   };
 
   if (!browserSupportsSpeechRecognition) {
-    return <span>Browser doesn't support speech recognition.</span>;
+    return <span className="text-red-500">Browser doesn't support speech recognition.</span>;
   }
 
   return (
     <div className="p-6 space-y-4">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+      
+      {permissionDenied && (
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+          Microphone access is required for speech recognition. Please refresh and allow microphone permissions.
+        </div>
+      )}
+
       <p>Microphone: {listening ? 'on' : 'off'}</p>
       <div className="space-x-4">
         <button
-          onClick={() => {
-            resetAll();
-            SpeechRecognition.startListening({ continuous: true });
-          }}
+          onClick={handleStartListening}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          disabled={permissionDenied}
         >
           Start Listening
         </button>
-        <button onClick={SpeechRecognition.stopListening}>Stop</button>
-        <button onClick={resetAll}>Reset</button>
+        <button 
+          onClick={SpeechRecognition.stopListening}
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Stop
+        </button>
+        <button 
+          onClick={resetAll}
+          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Reset
+        </button>
       </div>
       <p className="text-gray-700">Transcript: {transcript}</p>
       <div className="bg-gray-100 rounded p-4">
         <p><strong>Detected Name:</strong> {fullName || '---'}</p>
         <p><strong>Detected Phone:</strong> {phone || '---'}</p>
       </div>
-     {responseData && (
-  <div className="bg-green-100 border border-green-400 rounded p-4">
-    <h3 className="font-semibold text-lg">User Info:</h3>
-    {responseData.error ? (
-      <p className="text-red-500">{responseData.error}</p>
-    ) : (
-      <>
-        <h2 className="text-xl font-bold mb-2">{responseData.user.fullName}</h2>
-        <p><strong>Email:</strong> {responseData.user.email}</p>
-        <p><strong>Phone:</strong> {responseData.user.phone}</p>
+      {responseData && (
+        <div className="bg-green-100 border border-green-400 rounded p-4">
+          <h3 className="font-semibold text-lg">User Info:</h3>
+          {responseData.error ? (
+            <p className="text-red-500">{responseData.error}</p>
+          ) : (
+            <>
+              <h2 className="text-xl font-bold mb-2">{responseData.user.fullName}</h2>
+              <p><strong>Email:</strong> {responseData.user.email}</p>
+              <p><strong>Phone:</strong> {responseData.user.phone}</p>
 
-        <div className="qr-code-container mt-4">
-          <QRCodeSVG 
-            value={responseData.user.qrCodeId} 
-            size={200}
-            level="H"
-            includeMargin={true}
-          />
-          <p className="qr-instruction mt-2 text-sm text-gray-600">Scan this QR code at the event</p>
+              <div className="qr-code-container mt-4">
+                <QRCodeSVG 
+                  value={responseData.user.qrCodeId} 
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                />
+                <p className="qr-instruction mt-2 text-sm text-gray-600">Scan this QR code at the event</p>
+              </div>
+            </>
+          )}
         </div>
-      </>
-    )}
-  </div>
-)}
-
+      )}
     </div>
   );
 };
