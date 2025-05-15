@@ -20,6 +20,18 @@ const Dictaphone = () => {
     }
   }, [fullName, phone]);
 
+//ADDED
+  useEffect(() => {
+  navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(() => {
+      console.log("Microphone permission granted.");
+    })
+    .catch((err) => {
+      console.error("Microphone access denied:", err);
+    });
+}, []);
+
+
   const extractSmartInfo = (text) => {
     const digitsOnly = text.replace(/(\d)\s+(\d)/g, '$1$2');
     const phoneMatch = digitsOnly.match(/(?:phone(?: number)? is\s*)?(\d{10})/);
