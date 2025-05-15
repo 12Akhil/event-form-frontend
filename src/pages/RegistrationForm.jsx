@@ -63,12 +63,13 @@ export default function RegistrationForm() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
-          <label>Full Name:</label>
+          <label>Name:</label>
           <input
             type="text"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
+            placeholder='FirstName LastName'
             required
             style={{ width: '100%', padding: '8px' }}
           />
@@ -79,6 +80,7 @@ export default function RegistrationForm() {
             type="email"
             name="email"
             value={formData.email}
+            placeholder='Only Business Mail'
             onChange={handleChange}
             required
             style={{ width: '100%', padding: '8px' }}
@@ -90,6 +92,7 @@ export default function RegistrationForm() {
             type="tel"
             name="phone"
             maxLength="10"
+            placeholder='For eg: 7893061223'
             value={formData.phone}
             onChange={handleChange}
             required
