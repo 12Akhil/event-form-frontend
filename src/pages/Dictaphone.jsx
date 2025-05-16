@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef ,useEffect, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -18,6 +18,76 @@ const Dictaphone = () => {
   const [submitted, setSubmitted] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [error, setError] = useState(null);
+
+
+  const printRef = useRef();
+ const handlePrint = () => {
+    const printContent = printRef.current.innerHTML;
+    const printWindow = window.open('', '_blank');
+    
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Print</title>
+          <style>
+            @page {
+              size: 9cm 12.5cm;
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              padding: 10px;
+              width: 9cm;
+              height: 12.5cm;
+              font-family: Arial, sans-serif;
+              font-size: 14px;
+            }
+            .print-content {
+              display: flex;
+              flex-direction: column;
+              height: 100%;
+            }
+            .user-info {
+              margin-bottom: 10px;
+            }
+            .qr-code-container {
+              flex-grow: 1;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+            }
+            h2 {
+              font-size: 18px;
+              text-align: center;
+              margin: 5px 0;
+            }
+            p {
+              margin: 4px 0;
+            }
+            .qr-instruction {
+              margin-top: 10px;
+              font-size: 12px;
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-content">
+            ${printContent}
+          </div>
+          <script>
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 200);
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   useEffect(() => {
     extractSmartInfo(transcript);
@@ -149,32 +219,42 @@ const Dictaphone = () => {
         <p><strong>Detected Name:</strong> {fullName || '---'}</p>
         <p><strong>Detected Phone:</strong> {phone || '---'}</p>
       </div>
-      {responseData && (
-        <div className="bg-green-100 border border-green-400 rounded p-4">
-          <h3 className="font-semibold text-lg">User Info:</h3>
-          {responseData.error ? (
-            <p className="text-red-500">{responseData.error}</p>
-          ) : (
-            <>
+
+      {responseData && !responseData.error && (
+        <div className="bg-green-100 border border-green-400 rounded p-4 relative">
+          <h3 className="font-semibold text-lg mb-2">User Info</h3>
+          <div ref={printRef} className="print-section">
+            <div className="bg-white p-4 rounded shadow">
               <h2 className="text-xl font-bold mb-2">{responseData.user.fullName}</h2>
               <p><strong>Email:</strong> {responseData.user.email}</p>
               <p><strong>Phone:</strong> {responseData.user.phone}</p>
 
-              <div className="qr-code-container mt-4">
+              <div className="flex justify-center mt-4">
                 <QRCodeSVG 
+                  id="qr-code"
                   value={responseData.user.qrCodeId} 
                   size={200}
                   level="H"
                   includeMargin={true}
                 />
-                <p className="qr-instruction mt-2 text-sm text-gray-600">Scan this QR code at the event</p>
               </div>
-            </>
-          )}
+              <p className="text-center text-sm text-gray-600 mt-2">
+                Scan this QR code at the event
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <button 
+              onClick={handlePrint}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-800"
+            >
+              Print
+            </button>
+          </div>
         </div>
       )}
     </div>
   );
 };
-
 export default Dictaphone;

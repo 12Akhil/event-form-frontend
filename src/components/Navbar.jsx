@@ -45,22 +45,6 @@ export default function Navbar() {
       >
         Event Form
       </button>
-      
-       {/* <button
-        onClick={language}  
-        style={{
-          backgroundColor: "#fff",
-          color: "#000",
-          border: "none",
-          padding: "0.5rem 1.5rem",
-          borderRadius: "4px",
-          cursor: "pointer",
-          fontWeight: "bold",
-          fontSize: "1rem"
-        }}
-      >
-        Live Audio
-      </button> */}
 
       <button
         onClick={handleAdminLogin}  
